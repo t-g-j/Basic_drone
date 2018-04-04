@@ -101,11 +101,25 @@ class Route_planning:
 			#print('  %d %c %.5fe %.5fn' % (zone, letter, easting, northing))
 
 	def remove_outliers(self):
-		 a = np.linspace(0,10,100)
-		 b = np.exp(-a)
-		 plt.plot(self.east,self.north)
-		 plt.axis('equal')
-		 plt.show()
+		dt=0
+		#a = np.linspace(0,10,100)
+		#b = np.exp(-a)
+		it = len(self.north)
+		for i in range(it):
+			if i == 0:
+				#print('test')
+				dt+=0
+			else:
+				dt+=float(self.time[i])-float(self.time[i-1])
+			print(dt)
+		plt.plot(self.east,self.north)
+		plt.axis('equal')
+		#plt.show()
+
+	def greatCircleFormulae(self,lat1, lon1, lat2, lon2):
+		d = 2 * asin(sqrt((sin((lat1 - lat2) / 2)) ** 2 + cos(lat1) * cos(lat2) * (sin((lon1 - lon2) / 2)) ** 2))
+		# d = acos(sin(lat1) * sin(lat2) + cos(lat1) * cos(lat2) * cos(lon1 - lon2))
+		return d
 
 
 if __name__ == "__main__":
@@ -122,3 +136,5 @@ if __name__ == "__main__":
 	print(rp.get_lon())
 	rp.conv_lat_lon_lists()
 	rp.remove_outliers()
+
+	# greatCircleFormulae(g_lat * pi / 180, g_lon * pi / 180, east_lat * pi / 180, east_lon * pi / 180) * earth_radius
