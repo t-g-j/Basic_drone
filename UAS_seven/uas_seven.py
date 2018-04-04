@@ -22,11 +22,12 @@ class Route_planning:
 		self.longtitude = []
 		self.altitude =[]
 		self.relative_alt=[]
-		self.hemisphere=[]
-		self.zone=[]
-		self.letter=[]
-		self.easting=[]
-		self.northing=[]
+		self.hem=[]
+		self.zo=[]
+		self.let=[]
+		self.east=[]
+		self.north=[]
+
 
 	def import_file(self, file_name):
 		file_ok = True
@@ -83,20 +84,35 @@ class Route_planning:
 		# convert from geodetic to UTM
 		self.lat = rp.conv_2_float(self.latitude)
 		self.lon = rp.conv_2_float(self.longtitude)
-		print(type(self.lon[1]))
-		print(type(self.lat))
-		#for x in self.latitude:
-		(hemisphere, zone, letter, easting, northing) = uc.geodetic_to_utm(self.lat[1], self.lon[1])
+		#print(tmp)
+		#print(tmp2)
 		print('\nConverted from geodetic to UTM [m]')
-		print('  %d %c %.5fe %.5fn' % (zone, letter, easting, northing))
+		it = len(self.latitude)
+		print(it)
+		for x in range(it):
+			tmp = self.lat[x]
+			tmp2 = self.lon[x]
+			(hemisphere, zone, letter, easting, northing) = uc.geodetic_to_utm(float(tmp),float(tmp2))
+			self.hem.append(hemisphere)
+			self.zo.append(zone)
+			self.let.append(letter)
+			self.east.append(easting)
+			self.north.append(northing)
+			#print('  %d %c %.5fe %.5fn' % (zone, letter, easting, northing))
 
-
+	def remove_outliers(self):
+		 a = np.linspace(0,10,100)
+		 b = np.exp(-a)
+		 plt.plot(self.east,self.north)
+		 plt.axis('equal')
+		 plt.show()
 
 
 if __name__ == "__main__":
 	print('Importing file')
 	rp = Route_planning()
-	rp.import_file('position_inside.log')
+	#rp.import_file('position_tekbuilding.log')
+	rp.import_file('position_last_walk.log')
 	print('Done importing')
 	print("----- Time -------")
 	print(rp.get_time())
@@ -105,3 +121,4 @@ if __name__ == "__main__":
 	print("\n----- Longtitude -------")
 	print(rp.get_lon())
 	rp.conv_lat_lon_lists()
+	rp.remove_outliers()
