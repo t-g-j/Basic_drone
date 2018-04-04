@@ -39,7 +39,7 @@ from utm import utmconv
 from math import pi, cos, sin, asin, acos, sqrt
 
 # define test position
-test_lat =  55.0
+test_lat = 55.0
 test_lon = 009.0
 print ('Test position [deg]:')
 print ('  latitude:  %.10f'  % (test_lat))
