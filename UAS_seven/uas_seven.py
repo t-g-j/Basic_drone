@@ -27,6 +27,9 @@ class Route_planning:
 		self.let=[]
 		self.east=[]
 		self.north=[]
+		self.maxVel = 20 # m/s
+		self.removedOutliers_east = []
+		self.removedOutliers_north =[]
 
 
 	def import_file(self, file_name):
@@ -92,7 +95,9 @@ class Route_planning:
 		for x in range(it):
 			tmp = self.lat[x]
 			tmp2 = self.lon[x]
+
 			(hemisphere, zone, letter, easting, northing) = uc.geodetic_to_utm(float(tmp),float(tmp2))
+			#print(rp.greatCircleFormulae(float(self.lat[x]),float(self.lon[x]),float(self.lat[x-1]),float(self.lon[x-1])))
 			self.hem.append(hemisphere)
 			self.zo.append(zone)
 			self.let.append(letter)
@@ -101,7 +106,9 @@ class Route_planning:
 			#print('  %d %c %.5fe %.5fn' % (zone, letter, easting, northing))
 
 	def remove_outliers(self):
+		acumu_t=0
 		dt=0
+		diff_t=0
 		#a = np.linspace(0,10,100)
 		#b = np.exp(-a)
 		it = len(self.north)
@@ -110,16 +117,36 @@ class Route_planning:
 				#print('test')
 				dt+=0
 			else:
-				dt+=float(self.time[i])-float(self.time[i-1])
-			print(dt)
-		plt.plot(self.east,self.north)
+				acumu_t+=float(self.time[i])-float(self.time[i-1])
+				diff_t = float(self.time[i])-float(self.time[i-1])
+				(utm_diff_east, utm_diff_north) = self.east[i]-self.east[i-1],self.north[i]-self.north[i-1]
+				#print(utm_diff_east,utm_diff_north)
+				distance = sqrt(utm_diff_north**2 + utm_diff_east**2)
+				#print(distance)
+				m_pr_sec = distance/diff_t
+				km_pr_hour = m_pr_sec *3.6
+
+				if m_pr_sec < self.maxVel:
+					self.removedOutliers_east.append(self.east[i])
+					self.removedOutliers_north.append(self.north[i])
+			#print(dt)
+			#print(diff)
+		print(len(self.removedOutliers_north),len(self.north))
+
+		plt.plot(self.removedOutliers_east,self.removedOutliers_north)
 		plt.axis('equal')
-		#plt.show()
+		plt.show()
 
 	def greatCircleFormulae(self,lat1, lon1, lat2, lon2):
-		d = 2 * asin(sqrt((sin((lat1 - lat2) / 2)) ** 2 + cos(lat1) * cos(lat2) * (sin((lon1 - lon2) / 2)) ** 2))
+		tmp1 = lat1* pi / 180
+		tmp2 =lon1* pi / 180
+		tmp3 = lat2 * pi/180
+		tmp4 = lon2 *pi/180
+		d = 2 * asin(sqrt((sin((tmp1 - tmp3) / 2)) ** 2 + cos(tmp1) * cos(tmp3) * (sin((tmp2 - tmp4) / 2)) ** 2))
 		# d = acos(sin(lat1) * sin(lat2) + cos(lat1) * cos(lat2) * cos(lon1 - lon2))
 		return d
+
+	def simplify_track(self):
 
 
 if __name__ == "__main__":
